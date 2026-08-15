@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://www.sped.fazenda.gov.br/nfse"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           targetNamespace="http://www.sped.fazenda.gov.br/nfse"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+    <xs:include schemaLocation="tiposBasicos_v1.00.xsd"/>
+    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd"/>
+
+    <xs:element name="pedRegEvento">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="infPedReg" type="TInfPedReg"/>
+                <xs:element ref="ds:Signature" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="versao" type="TVerNFSe" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="TInfPedReg">
+        <xs:sequence>
+            <xs:element name="tpAmb" type="TAmb"/>
+            <xs:element name="verAplic" type="xs:string"/>
+            <xs:element name="dhEvento" type="TDateTimeUTC"/>
+            <xs:element name="tpEvento" type="xs:string"/>
+            <xs:element name="nSeqEvento" type="xs:positiveInteger"/>
+            <xs:choice>
+                <xs:element name="CNPJAutor" type="TCnpj"/>
+                <xs:element name="CPFAutor" type="TCpf"/>
+            </xs:choice>
+            <xs:element name="chNFSe" type="TChaveNFSe"/>
+            <xs:element name="detEvento" type="TDetEvento"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TDetEvento">
+        <xs:choice>
+            <xs:element name="e101101" type="TE101101"/>
+            <xs:element name="e101103" type="TE101103"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="TE101101">
+        <xs:sequence>
+            <xs:element name="cMotivo" type="xs:string"/>
+            <xs:element name="xMotivo" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TE101103">
+        <xs:sequence>
+            <xs:element name="cMotivo" type="xs:string"/>
+            <xs:element name="xMotivo" type="xs:string" minOccurs="0"/>
+            <xs:element name="chDPSSubst" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

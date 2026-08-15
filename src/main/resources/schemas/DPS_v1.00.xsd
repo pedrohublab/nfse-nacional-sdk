@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://www.sped.fazenda.gov.br/nfse"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           targetNamespace="http://www.sped.fazenda.gov.br/nfse"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+    <xs:include schemaLocation="tiposBasicos_v1.00.xsd"/>
+    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd"/>
+
+    <xs:element name="DPS">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="infDPS" type="TInfDPS"/>
+                <xs:element ref="ds:Signature" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="TInfDPS">
+        <xs:sequence>
+            <xs:element name="tpAmb" type="TAmb"/>
+            <xs:element name="dhEmi" type="TDateTimeUTC"/>
+            <xs:element name="verAplic" type="xs:string"/>
+            <xs:element name="serie" type="TSerie"/>
+            <xs:element name="nDPS" type="TNumDPS"/>
+            <xs:element name="dCompet" type="TData"/>
+            <xs:element name="tpEmit" type="xs:string"/>
+            <xs:element name="cLocEmi" type="TCodMunIBGE"/>
+            <xs:element name="subst" type="TSubst" minOccurs="0"/>
+            <xs:element name="prest" type="TPrest"/>
+            <xs:element name="toma" type="TToma" minOccurs="0"/>
+            <xs:element name="interm" type="TInterm" minOccurs="0"/>
+            <xs:element name="serv" type="TServ"/>
+            <xs:element name="valores" type="TValores"/>
+            <xs:element name="infAdic" type="TInfAdic" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:string" use="required"/>
+        <xs:attribute name="versao" type="TVerNFSe" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TSubst">
+        <xs:sequence>
+            <xs:element name="chSubstda" type="xs:string"/>
+            <xs:element name="cMotivo" type="xs:string"/>
+            <xs:element name="xMotivo" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TPrest">
+        <xs:sequence>
+            <xs:element name="CNPJ" type="TCnpj"/>
+            <xs:element name="IM" type="xs:string" minOccurs="0"/>
+            <xs:element name="xNome" type="xs:string"/>
+            <xs:element name="end" type="TEndereco" minOccurs="0"/>
+            <xs:element name="fone" type="xs:string" minOccurs="0"/>
+            <xs:element name="email" type="xs:string" minOccurs="0"/>
+            <xs:element name="regTrib" type="TRegTrib" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TRegTrib">
+        <xs:sequence>
+            <xs:element name="opSimpNac" type="xs:string"/>
+            <xs:element name="regApTribSN" type="xs:string" minOccurs="0"/>
+            <xs:element name="regEspTrib" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TToma">
+        <xs:sequence>
+            <xs:choice minOccurs="0">
+                <xs:element name="CNPJ" type="TCnpj"/>
+                <xs:element name="CPF" type="TCpf"/>
+            </xs:choice>
+            <xs:element name="xNome" type="xs:string" minOccurs="0"/>
+            <xs:element name="end" type="TEndereco" minOccurs="0"/>
+            <xs:element name="fone" type="xs:string" minOccurs="0"/>
+            <xs:element name="email" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TInterm">
+        <xs:sequence>
+            <xs:choice>
+                <xs:element name="CNPJ" type="TCnpj"/>
+                <xs:element name="CPF" type="TCpf"/>
+            </xs:choice>
+            <xs:element name="xNome" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TEndereco">
+        <xs:sequence>
+            <xs:element name="xLgr" type="xs:string"/>
+            <xs:element name="nro" type="xs:string"/>
+            <xs:element name="xCpl" type="xs:string" minOccurs="0"/>
+            <xs:element name="xBairro" type="xs:string"/>
+            <xs:element name="cMun" type="TCodMunIBGE"/>
+            <xs:element name="UF" type="TUf"/>
+            <xs:element name="CEP" type="TCep"/>
+            <xs:element name="cPais" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TServ">
+        <xs:sequence>
+            <xs:element name="cServ" type="TCServ"/>
+            <xs:element name="locPrest" type="TLocPrest"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TCServ">
+        <xs:sequence>
+            <xs:element name="cTribNac" type="xs:string"/>
+            <xs:element name="cTribMun" type="xs:string" minOccurs="0"/>
+            <xs:element name="CNAE" type="xs:string" minOccurs="0"/>
+            <xs:element name="xDescServ" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TLocPrest">
+        <xs:sequence>
+            <xs:element name="cLocPrestacao" type="TCodMunIBGE"/>
+            <xs:element name="cPaisPrestacao" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TValores">
+        <xs:sequence>
+            <xs:element name="vServPrest" type="TVServPrest"/>
+            <xs:element name="vDescIncond" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="vDescCond" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="pDed" type="TDec_0302" minOccurs="0"/>
+            <xs:element name="vDed" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="trib" type="TTrib"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TVServPrest">
+        <xs:sequence>
+            <xs:element name="vReceb" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="vServ" type="TDec_1502"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TTrib">
+        <xs:sequence>
+            <xs:element name="tribMun" type="TTribMun"/>
+            <xs:element name="tribFed" type="TTribFed" minOccurs="0"/>
+            <xs:element name="totTrib" type="TTotTrib" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TTribMun">
+        <xs:sequence>
+            <xs:element name="tribISSQN" type="xs:string"/>
+            <xs:element name="cPaisResult" type="xs:string" minOccurs="0"/>
+            <xs:element name="bm" type="TBM" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TBM">
+        <xs:sequence>
+            <xs:element name="vBCISS" type="TDec_1502"/>
+            <xs:element name="pAliq" type="TDec_0302"/>
+            <xs:element name="vISS" type="TDec_1502"/>
+            <xs:element name="tpRetISSQN" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TTribFed">
+        <xs:sequence>
+            <xs:element name="piscofins" type="TPisCofins" minOccurs="0"/>
+            <xs:element name="vRetCP" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="vRetIRRF" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="vRetCSLL" type="TDec_1502" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TPisCofins">
+        <xs:sequence>
+            <xs:element name="vPIS" type="TDec_1502" minOccurs="0"/>
+            <xs:element name="vCOFINS" type="TDec_1502" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TTotTrib">
+        <xs:sequence>
+            <xs:element name="indTotTrib" type="xs:string"/>
+            <xs:element name="pTotTribSN" type="TDec_0302" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TInfAdic">
+        <xs:sequence>
+            <xs:element name="xInfAdic" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

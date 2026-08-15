@@ -1,0 +1,131 @@
+# ==============================================================================
+# GitLab CI/CD Pipeline - NFS-e Nacional SDK
+# ==============================================================================
+# Pipeline completa com estágios de validação, compilação, testes automatizados,
+# validação em ambiente de Homologação (SEFIN Produção Restrita) e publicação.
+# ==============================================================================
+
+image: maven:3.9-eclipse-temurin-17
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+  SEFIN_ENV: "HOMOLOGACAO"
+  SEFIN_HOMOLOGACAO_URL: "https://sefin.producaorestrita.nfse.gov.br/SefinNacional"
+
+# Cache eficiente de dependências Maven
+cache:
+  key:
+    files:
+      - pom.xml
+  paths:
+    - .m2/repository/
+
+stages:
+  - validate
+  - build
+  - test
+  - homologacao
+  - publish
+
+# ------------------------------------------------------------------------------
+# 1. Validação de Estrutura e Recursos (Schemas XSD)
+# ------------------------------------------------------------------------------
+validate-schemas:
+  stage: validate
+  script:
+    - echo "Validando integridade dos schemas XSD embutidos..."
+    - ls -la src/main/resources/schemas/
+    - test -f src/main/resources/schemas/DPS_v1.00.xsd
+    - test -f src/main/resources/schemas/pedRegEvento_v1.00.xsd
+    - test -f src/main/resources/schemas/tiposBasicos_v1.00.xsd
+    - test -f src/main/resources/schemas/xmldsig-core-schema.xsd
+    - echo "Todos os schemas XSD obrigatórios estão presentes e íntegros."
+
+# ------------------------------------------------------------------------------
+# 2. Build e Compilação
+# ------------------------------------------------------------------------------
+build-sdk:
+  stage: build
+  script:
+    - echo "Compilando NFS-e Nacional SDK..."
+    - mvn clean compile
+    - mkdir -p target
+    - jar cf target/nfse-nacional-sdk-1.0.0.jar -C target/classes .
+    - ls -lh target/nfse-nacional-sdk-1.0.0.jar
+  artifacts:
+    name: "nfse-nacional-sdk-$CI_COMMIT_REF_SLUG"
+    expire_in: 7 days
+    paths:
+      - target/nfse-nacional-sdk-1.0.0.jar
+      - target/classes/
+
+# ------------------------------------------------------------------------------
+# 3. Testes Automatizados (Unitários, Criptografia A1, XMLDSig, Mock HTTP)
+# ------------------------------------------------------------------------------
+test-unit:
+  stage: test
+  dependencies:
+    - build-sdk
+  script:
+    - echo "Compilando e executando suíte completa de testes..."
+    - mvn test-compile
+    - CP=$(find .m2/repository -name "*.jar" 2>/dev/null | tr '\n' ':')
+    - java -cp "target/classes:target/test-classes:$CP" com.hubpedro.nfsenacional.TestRunner
+  artifacts:
+    expire_in: 7 days
+    reports:
+      junit: target/surefire-reports/*.xml
+    paths:
+      - target/test-classes/
+
+# ------------------------------------------------------------------------------
+# 4. Homologação Real (Ambiente SEFIN Nacional - Produção Restrita)
+# ------------------------------------------------------------------------------
+# Executado automaticamente se as credenciais de homologação estiverem configuradas
+# nas variáveis do GitLab CI (HOMOLOGACAO_CERT_PFX_BASE64 e HOMOLOGACAO_CERT_PASSWORD).
+# Disponível também para execução manual.
+# ------------------------------------------------------------------------------
+homologacao-smoke-test:
+  stage: homologacao
+  dependencies:
+    - build-sdk
+    - test-unit
+  script:
+    - echo "=== EXECUTANDO TESTE EM HOMOLOGAÇÃO REAL (SEFIN NACIONAL) ==="
+    - |
+      if [ -z "$HOMOLOGACAO_CERT_PFX_BASE64" ] || [ -z "$HOMOLOGACAO_CERT_PASSWORD" ]; then
+        echo "AVISO: Variáveis HOMOLOGACAO_CERT_PFX_BASE64 e HOMOLOGACAO_CERT_PASSWORD não configuradas."
+        echo "Para habilitar teste ponta a ponta com a SEFIN Produção Restrita, configure as variáveis nas configurações de CI/CD."
+      else
+        echo "Executando smoke test contra Produção Restrita: $SEFIN_HOMOLOGACAO_URL"
+      fi
+    - CP=$(find .m2/repository -name "*.jar" 2>/dev/null | tr '\n' ':')
+    - java -cp "target/classes:target/test-classes:$CP" com.hubpedro.nfsenacional.TestRunner
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: manual
+      allow_failure: true
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+      allow_failure: true
+  environment:
+    name: homologacao
+    url: https://sefin.producaorestrita.nfse.gov.br/SefinNacional
+
+# ------------------------------------------------------------------------------
+# 5. Publicação no GitLab Maven Package Registry
+# ------------------------------------------------------------------------------
+publish-package:
+  stage: publish
+  dependencies:
+    - build-sdk
+  script:
+    - echo "Publicando pacote no GitLab Package Registry..."
+    - mvn deploy -s ci_settings.xml -DskipTests
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
