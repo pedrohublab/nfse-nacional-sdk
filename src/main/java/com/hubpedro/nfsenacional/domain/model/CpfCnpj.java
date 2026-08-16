@@ -1,14 +1,15 @@
 package com.hubpedro.nfsenacional.domain.model;
 
+import com.hubpedro.nfsenacional.domain.valueobject.CNPJ;
+import com.hubpedro.nfsenacional.domain.valueobject.CPF;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Value Object polimórfico que representa um CPF ou CNPJ válido.
+ * Value Object polimórfico que representa um CPF (11 dígitos) ou CNPJ (14 caracteres numéricos/alfanuméricos) válido.
  */
 public final class CpfCnpj {
-
-    private static final Pattern NON_DIGITS = Pattern.compile("[^0-9]");
 
     private final Tipo tipo;
     private final String numero;
@@ -20,32 +21,35 @@ public final class CpfCnpj {
     }
 
     private static String limpar(String valor) {
-        return NON_DIGITS.matcher(valor).replaceAll("");
+        return valor.replaceAll("[^0-9A-Za-z]", "").toUpperCase();
     }
 
     private void validar() {
-        if (tipo == Tipo.CPF && numero.length() != 11) {
-            throw new IllegalArgumentException("CPF deve ter 11 dígitos");
-        }
-        if (tipo == Tipo.CNPJ && numero.length() != 14) {
-            throw new IllegalArgumentException("CNPJ deve ter 14 dígitos");
+        if (tipo == Tipo.CPF) {
+            if (numero.length() != 11 || !numero.matches("\\d{11}")) {
+                throw new IllegalArgumentException("CPF deve ter 11 dígitos numéricos");
+            }
+        } else if (tipo == Tipo.CNPJ) {
+            if (numero.length() != 14 || !CNPJ.validar(numero)) {
+                throw new IllegalArgumentException("CNPJ inválido: " + numero);
+            }
         }
     }
 
     /**
-     * Detecta automaticamente se é CPF ou CNPJ pela quantidade de dígitos numéricos.
+     * Detecta automaticamente se é CPF ou CNPJ pela quantidade e formato de caracteres.
      */
-    public static CpfCnpj of(String numero) {
-        if (numero == null || numero.isBlank()) {
+    public static CpfCnpj of(String valor) {
+        if (valor == null || valor.isBlank()) {
             throw new IllegalArgumentException("Número de CPF/CNPJ não pode ser nulo ou vazio");
         }
-        String limpo = NON_DIGITS.matcher(numero).replaceAll("");
-        if (limpo.length() == 11) {
+        String limpo = limpar(valor);
+        if (limpo.length() == 11 && limpo.matches("\\d{11}")) {
             return cpf(limpo);
         } else if (limpo.length() == 14) {
             return cnpj(limpo);
         }
-        throw new IllegalArgumentException("Número inválido: deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ)");
+        throw new IllegalArgumentException("Número inválido: deve ter 11 dígitos (CPF) ou 14 caracteres (CNPJ): " + valor);
     }
 
     public static CpfCnpj cpf(String cpf) {
