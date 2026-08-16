@@ -154,6 +154,12 @@ String base64Pdf = danfse.toBase64();
 
 // Download do XML completo autorizado
 String xmlAutorizado = client.downloadXml(chaveAcesso);
+
+// Salvamento automático organizado em pastas: /dados/xmls/2026/08/15/{chaveAcesso}.xml
+Path arquivoSalvo = retorno.salvarXml(Path.of("/dados/xmls"));
+
+// Salvamento automático do DANFSE (PDF) em: /dados/danfses/2026/08/15/{chaveAcesso}.pdf
+danfse.salvarEmDiretorio(Path.of("/dados/danfses"));
 ```
 
 ---

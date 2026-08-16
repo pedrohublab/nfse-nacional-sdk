@@ -57,4 +57,27 @@ public record RetornoEmissaoDps(
                 null, httpStatus, tempoRespostaMs
         );
     }
+    /**
+     * Salva o XML em disco organizado automaticamente em subpastas ano/mes/dia/{chave}.xml.
+     * Salva preferencialmente o xmlAutorizado (se disponível) ou o xmlAssinado.
+     *
+     * @param baseDir diretório raiz de armazenamento (ex: Path.of("/dados/xmls"))
+     * @return Path do arquivo salvo
+     * @throws java.io.IOException em caso de erro de gravação
+     */
+    public java.nio.file.Path salvarXml(java.nio.file.Path baseDir) throws java.io.IOException {
+        return salvarXml(baseDir, java.time.LocalDate.now());
+    }
+
+    /**
+     * Salva o XML em disco organizado em subpastas ano/mes/dia/{chave}.xml usando data customizada.
+     */
+    public java.nio.file.Path salvarXml(java.nio.file.Path baseDir, java.time.LocalDate data) throws java.io.IOException {
+        String conteudo = xmlAutorizado != null ? xmlAutorizado : xmlAssinado;
+        if (conteudo == null) {
+            throw new IllegalStateException("Nenhum conteúdo XML disponível para salvar nesta emissão.");
+        }
+        String nomeBase = chaveAcesso != null ? chaveAcesso : (chaveDPS != null ? chaveDPS + "_dps" : "nfse_" + System.currentTimeMillis());
+        return com.hubpedro.nfsenacional.storage.XmlStorageHelper.salvarXml(baseDir, nomeBase, conteudo, data);
+    }
 }

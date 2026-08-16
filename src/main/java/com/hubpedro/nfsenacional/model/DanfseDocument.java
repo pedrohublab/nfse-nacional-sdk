@@ -34,6 +34,15 @@ public record DanfseDocument(
         Files.write(destino, pdfBytes);
     }
 
+    /**
+     * Salva o PDF em disco organizado automaticamente em subpastas ano/mes/dia/{chaveAcesso}.pdf.
+     */
+    public Path salvarEmDiretorio(Path baseDir) throws IOException {
+        return com.hubpedro.nfsenacional.storage.XmlStorageHelper.salvarBinario(
+                baseDir, chaveAcesso, pdfBytes, ".pdf", java.time.LocalDate.now()
+        );
+    }
+
     public int getTamanhoBytes() {
         return pdfBytes.length;
     }

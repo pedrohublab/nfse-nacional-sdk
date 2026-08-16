@@ -3,6 +3,7 @@ package com.hubpedro.nfsenacional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,8 @@ public final class TestRunner {
                 com.hubpedro.nfsenacional.xml.PayloadEncoderTest.class,
                 com.hubpedro.nfsenacional.gateway.SefinNacionalGatewayTest.class,
                 com.hubpedro.nfsenacional.NFSeNacionalClientTest.class,
-                com.hubpedro.nfsenacional.homologacao.HomologacaoSmokeTest.class
+                com.hubpedro.nfsenacional.homologacao.HomologacaoSmokeTest.class,
+                com.hubpedro.nfsenacional.storage.XmlStorageHelperTest.class
         );
 
         int totalTests = 0;
@@ -74,13 +76,24 @@ public final class TestRunner {
 
                         passedTests++;
                         System.out.println("  ✓ " + testDesc);
-                    } catch (Throwable t) {
+                    } catch (InvocationTargetException e) {
+                        Throwable cause = e.getCause();
+                        if (cause instanceof org.opentest4j.TestAbortedException) {
+                            System.out.println("  ↷ " + testDesc + " (IGNORADO / SKIPPED: " + cause.getMessage() + ")");
+                            // Não incrementa falhas pois é teste condicional ignorado
+                        } else {
+                            failedTests++;
+                            failures.add(testClass.getSimpleName() + "." + method.getName() + ": " + (cause != null ? cause.getMessage() : e.getMessage()));
+                            System.out.println("  ✗ " + testDesc + " -> " + (cause != null ? cause.getMessage() : e.getMessage()));
+                            if (cause != null) {
+                                cause.printStackTrace(System.out);
+                            }
+                        }
+                    } catch (Exception e) {
                         failedTests++;
-                        Throwable cause = t.getCause() != null ? t.getCause() : t;
-                        String failMsg = className + "." + method.getName() + ": " + cause.getMessage();
-                        failures.add(failMsg);
-                        System.err.println("  ✗ " + testDesc + " -> " + cause.getMessage());
-                        cause.printStackTrace(System.err);
+                        failures.add(testClass.getSimpleName() + "." + method.getName() + ": " + e.getMessage());
+                        System.out.println("  ✗ " + testDesc + " -> " + e.getMessage());
+                        e.printStackTrace(System.out);
                     }
                 }
             }
