@@ -33,3 +33,5 @@ out/
 ### macOS / Linux ###
 .DS_Store
 *.log
+
+.agents
