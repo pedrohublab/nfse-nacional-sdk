@@ -1,0 +1,55 @@
+name: CI/CD Pipeline
+
+on:
+  # Dispara quando um PR é aberto, sincronizado (novos commits) ou reaberto contra main ou develop
+  # (Ideal para validar PRs de bots como Jules, dependabot e contribuidores externos)
+  pull_request:
+    branches: [ "main", "develop" ]
+
+  # Dispara a cada push direto ou merge nas branches principais
+  push:
+    branches: [ "main", "develop" ]
+
+  # Permite disparar o workflow manualmente pela aba Actions no GitHub
+  workflow_dispatch:
+
+# Princípio do menor privilégio: o job só pode ler o repositório
+permissions:
+  contents: read
+
+# Cancela execuções anteriores se novos commits forem enviados para o mesmo PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # 1. Clona o código fonte do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configura a JDK 17 com cache inteligente do Maven (.m2)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # 3. Compilação e Execução de Testes
+      - name: Build & Run Tests with Maven
+        run: mvn -B clean verify
+
+      # 4. Salva relatórios de teste em caso de falha para facilitar o diagnóstico
+      - name: Upload Test Reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/
+          retention-days: 7

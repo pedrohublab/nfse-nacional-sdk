@@ -25,8 +25,8 @@ public final class ChaveDPS {
     private DpsEmissionStatus status;
 
     public static ChaveDPS of(String chave50) {
-        if (chave50 == null || !chave50.matches("\\d{50}")) {
-            throw new IllegalArgumentException("Chave da DPS deve ter exatamente 50 dígitos numéricos: " + chave50);
+        if (chave50 == null || !chave50.matches("[0-9A-Za-z]{50}")) {
+            throw new IllegalArgumentException("Chave da DPS deve ter exatamente 50 caracteres: " + chave50);
         }
         return new ChaveDPS(chave50);
     }
@@ -65,8 +65,8 @@ public final class ChaveDPS {
         if (!codigoMunicipio.matches("\\d{7}")) {
             throw new IllegalArgumentException("Código do município deve ter 7 dígitos: " + codigoMunicipio);
         }
-        if (!cnpjPrestador.matches("\\d{14}")) {
-            throw new IllegalArgumentException("CNPJ do prestador deve ter 14 dígitos: " + cnpjPrestador);
+        if (!cnpjPrestador.matches("[0-9A-Za-z]{14}")) {
+            throw new IllegalArgumentException("CNPJ do prestador deve ter 14 caracteres: " + cnpjPrestador);
         }
         if (serie.isEmpty() || serie.length() > 5) {
             throw new IllegalArgumentException("Série deve ter entre 1 e 5 caracteres: " + serie);
@@ -108,7 +108,8 @@ public final class ChaveDPS {
         int indicePeso = 0;
 
         for (int i = chaveBase.length() - 1; i >= 0; i--) {
-            int digito = Character.getNumericValue(chaveBase.charAt(i));
+            char c = chaveBase.charAt(i);
+            int digito = (c >= 'A' && c <= 'Z') ? (c - 48) : ((c >= 'a' && c <= 'z') ? (c - 80) : Character.getNumericValue(c));
             soma += digito * pesos[indicePeso % pesos.length];
             indicePeso++;
         }

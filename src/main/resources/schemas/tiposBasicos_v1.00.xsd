@@ -44,7 +44,7 @@
 
     <xs:simpleType name="TCnpj">
         <xs:restriction base="xs:string">
-            <xs:pattern value="[0-9]{14}"/>
+            <xs:pattern value="[0-9A-Za-z]{14}"/>
         </xs:restriction>
     </xs:simpleType>
 
