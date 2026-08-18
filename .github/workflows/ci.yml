@@ -53,3 +53,12 @@ jobs:
           name: surefire-test-reports
           path: target/surefire-reports/
           retention-days: 7
+
+      # 5. Salva o relatório de cobertura do JaCoCo
+      - name: Upload JaCoCo Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
+          retention-days: 14
