@@ -3,7 +3,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+### STS / Eclipse ###
 .apt_generated
 .classpath
 .factorypath
@@ -30,8 +30,24 @@ out/
 ### VS Code ###
 .vscode/
 
-### macOS / Linux ###
-.DS_Store
-*.log
+### Agent & AI tools ###
+.agents/
+.gemini/
+.claude/
 
-.agents
+### Certificados e Credenciais Sensiveis ###
+*.pfx
+*.p12
+*.pem
+*.key
+*.jks
+*.keystore
+.env
+.env.*
+!.env.example
+!.env.template
+
+### OS / Logs ###
+.DS_Store
+Thumbs.db
+*.log
