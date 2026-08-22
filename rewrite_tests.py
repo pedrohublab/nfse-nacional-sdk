@@ -1,4 +1,6 @@
-package com.hubpedro.nfsenacional.gateway;
+import re
+
+content = """package com.hubpedro.nfsenacional.gateway;
 
 import com.hubpedro.nfsenacional.domain.enums.DpsEmissionStatus;
 import com.hubpedro.nfsenacional.domain.exception.*;
@@ -139,3 +141,7 @@ class SefinErrorMapperTest {
         assertEquals("HTTP Status 404", exception.getMessage());
     }
 }
+"""
+
+with open("src/test/java/com/hubpedro/nfsenacional/gateway/SefinErrorMapperTest.java", "w") as f:
+    f.write(content)
