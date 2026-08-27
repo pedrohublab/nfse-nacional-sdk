@@ -206,7 +206,7 @@ public final class CertificateService implements Closeable {
                 }
             }
         } catch (Exception e) {
-            log.debug("Erro de parsing de baixo nível no SAN bytes, tentando outros métodos: {}", e.getMessage());
+            log.debug("Erro de parsing de baixo nível no SAN bytes, tentando outros métodos.", e);
         }
         return null;
     }
