@@ -2,7 +2,6 @@ package com.hubpedro.nfsenacional.domain.valueobject;
 
 import com.hubpedro.nfsenacional.domain.enums.DpsEmissionStatus;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
